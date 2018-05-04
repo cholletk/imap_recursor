@@ -66,9 +66,9 @@ help="using ssl or not (imaps vs imap)", default="true", choices=['false', 'true
 
 options = parser.parse_args()
 
-if options.ssl == "true"
+if options.ssl == "true" :
     imap_ressource = imaplib.IMAP4_SSL(options.server)
-else
+else :
     imap_ressource = imaplib.IMAP4(options.server)
 
 
