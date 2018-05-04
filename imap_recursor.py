@@ -13,9 +13,6 @@ import email.header
 import datetime
 import argparse
 
-EMAIL_ACCOUNT = "notatallawhistleblowerIswear@gmail.com"
-EMAIL_FOLDER = "Top Secret/PRISM Documents"
-
 
 def process_mailbox(M):
     """
@@ -25,27 +22,27 @@ def process_mailbox(M):
 
     rv, data = M.search(None, "ALL")
     if rv != 'OK':
-        print "No messages found!"
+        print("No messages found!")
         return
 
     for num in data[0].split():
         rv, data = M.fetch(num, '(RFC822)')
         if rv != 'OK':
-            print "ERROR getting message", num
+            print("ERROR getting message", num)
             return
 
         msg = email.message_from_string(data[0][1])
         decode = email.header.decode_header(msg['Subject'])[0]
         subject = unicode(decode[0])
-        print 'Message %s: %s' % (num, subject)
-        print 'Raw Date:', msg['Date']
+        print('Message %s: %s' % (num, subject))
+        print('Raw Date:', msg['Date'])
         # Now convert to local date-time
         date_tuple = email.utils.parsedate_tz(msg['Date'])
         if date_tuple:
             local_date = datetime.datetime.fromtimestamp(
                 email.utils.mktime_tz(date_tuple))
-            print "Local Date:", \
-                local_date.strftime("%a, %d %b %Y %H:%M:%S")
+            print("Local Date:",
+                local_date.strftime("%a, %d %b %Y %H:%M:%S"))
 
 
 #Parsing arguments
@@ -70,22 +67,22 @@ imap_ressource = imaplib.IMAP4_SSL(options.server)
 try:
     rv, data = imap_ressource.login(options.username, options.password)
 except imaplib.IMAP4.error:
-    print "LOGIN FAILED!!! "
+    print("LOGIN FAILED!!! ")
     sys.exit(1)
 
-print rv, data
+print(rv, data)
 
 rv, mailboxes = imap_ressource.list()
 if rv == 'OK':
-    print "Mailboxes:"
-    print mailboxes
+    print("Mailboxes:")
+    print(mailboxes)
 
 rv, data = imap_ressource.select(EMAIL_FOLDER)
 if rv == 'OK':
-    print "Processing mailbox...\n"
+    print("Processing mailbox...\n")
     process_mailbox(M)
     imap_ressource.close()
 else:
-    print "ERROR: Unable to open mailbox ", rv
+    print("ERROR: Unable to open mailbox ", rv)
 
 imap_ressource.logout()
