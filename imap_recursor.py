@@ -60,10 +60,18 @@ parser.add_argument('-s', '--server',
     action="store", dest="server",
 help="Imap server", required=True)
 
+parser.add_argument('-S', '--ssl',
+    action="store", dest="ssl",
+help="using ssl or not (imaps vs imap)", default="true", choices=['false', 'true'])
+
 options = parser.parse_args()
 
-imap_ressource = imaplib.IMAP4_SSL(options.server)
+if(options.ssl)
+    imap_ressource = imaplib.IMAP4_SSL(options.server)
+else
+    imap_ressource = imaplib.IMAP4(options.server)
 
+    
 try:
     rv, data = imap_ressource.login(options.username, options.password)
 except imaplib.IMAP4.error:
