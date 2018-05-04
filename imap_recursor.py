@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 #
-# Very basic example of using Python and IMAP to iterate over emails in a
-# gmail folder/label.  This code is released into the public domain.
-#
-# http://www.voidynullness.net/blog/2013/07/25/gmail-email-with-python-via-imap/
-#
+'''
+    File name: imap_recursor.py
+    License: GNU LESSER GENERAL PUBLIC LICENSE
+    Author: Kevin Chollet
+    Date created: 04/05/2018
+    Date last modified: 04/05/2018
+    Python Version: 3.2.3
+    Sources : sample used : http://www.voidynullness.net/blog/2013/07/25/gmail-email-with-python-via-imap/
+'''
+
 import sys
 import imaplib
-import getpass
 import email
-import email.header
-import datetime
 import argparse
+import subprocess
 
-
-def process_mailbox(M):
+def process_mailbox(M, command):
     """
     Do something with emails messages in the folder.
     For the sake of this example, print some headers.
@@ -33,6 +35,10 @@ def process_mailbox(M):
 
         print(data[0][1].decode("utf-8"))
         """msg = email.message_from_bytes(data[0][1])"""
+        proc = subprocess.Popen(command.split(' '), stdin=subprocess.PIPE)
+        proc.stdin.write(data[0][1])
+
+
 
 
 #Parsing arguments
@@ -58,6 +64,10 @@ parser.add_argument('-f', '--folder',
     action="store", dest="folder",
 help="Folder to explore", default="INBOX")
 
+parser.add_argument('-e', '--exec',
+    action="store", dest="execute",
+help="Command to execute" )
+
 
 options = parser.parse_args()
 
@@ -82,7 +92,7 @@ if result == 'OK':
 result, data = imap_ressource.select(options.folder)
 if result == 'OK':
     print("Processing mailbox...\n")
-    process_mailbox(imap_ressource)
+    process_mailbox(imap_ressource,options.execute)
     imap_ressource.close()
 else:
     print("ERROR: Unable to open mailbox ", rv)
