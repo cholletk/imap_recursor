@@ -64,6 +64,11 @@ parser.add_argument('-S', '--ssl',
     action="store", dest="ssl",
 help="using ssl or not (imaps vs imap)", default="true", choices=['false', 'true'])
 
+parser.add_argument('-f', '--folder',
+    action="store", dest="folder",
+help="Folder to explore", default="INBOX")
+
+
 options = parser.parse_args()
 
 if options.ssl == "true" :
@@ -71,22 +76,21 @@ if options.ssl == "true" :
 else :
     imap_ressource = imaplib.IMAP4(options.server)
 
-
 try:
-    rv, data = imap_ressource.login(options.username, options.password)
+    result, data = imap_ressource.login(options.username, options.password)
 except imaplib.IMAP4.error:
     print("LOGIN FAILED!!! ")
     sys.exit(1)
 
-print(rv, data)
+print(result, data)
 
-rv, mailboxes = imap_ressource.list()
-if rv == 'OK':
+result, mailboxes = imap_ressource.list()
+if result == 'OK':
     print("Mailboxes:")
     print(mailboxes)
 
-rv, data = imap_ressource.select(EMAIL_FOLDER)
-if rv == 'OK':
+result, data = imap_ressource.select(options.folder)
+if result == 'OK':
     print("Processing mailbox...\n")
     process_mailbox(M)
     imap_ressource.close()
