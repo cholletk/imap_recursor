@@ -11,6 +11,7 @@ import getpass
 import email
 import email.header
 import datetime
+import argparse
 
 EMAIL_ACCOUNT = "notatallawhistleblowerIswear@gmail.com"
 EMAIL_FOLDER = "Top Secret/PRISM Documents"
@@ -47,27 +48,44 @@ def process_mailbox(M):
                 local_date.strftime("%a, %d %b %Y %H:%M:%S")
 
 
-M = imaplib.IMAP4_SSL('imap.gmail.com')
+#Parsing arguments
+parser = argparse.ArgumentParser(description='Recurse over each email of imap directory')
+
+parser.add_argument('-u', '--username',
+    action="store", dest="username",
+help="Username", required=True)
+
+parser.add_argument('-p', '--password',
+    action="store", dest="password",
+help="Password", required=True)
+
+parser.add_argument('-s', '--server',
+    action="store", dest="server",
+help="Imap server", required=True)
+
+options = parser.parse_args()
+
+imap_ressource = imaplib.IMAP4_SSL(options.server)
 
 try:
-    rv, data = M.login(EMAIL_ACCOUNT, getpass.getpass())
+    rv, data = imap_ressource.login(options.username, options.password)
 except imaplib.IMAP4.error:
     print "LOGIN FAILED!!! "
     sys.exit(1)
 
 print rv, data
 
-rv, mailboxes = M.list()
+rv, mailboxes = imap_ressource.list()
 if rv == 'OK':
     print "Mailboxes:"
     print mailboxes
 
-rv, data = M.select(EMAIL_FOLDER)
+rv, data = imap_ressource.select(EMAIL_FOLDER)
 if rv == 'OK':
     print "Processing mailbox...\n"
     process_mailbox(M)
-    M.close()
+    imap_ressource.close()
 else:
     print "ERROR: Unable to open mailbox ", rv
 
-M.logout()
+imap_ressource.logout()
