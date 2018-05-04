@@ -16,27 +16,37 @@ import email
 import argparse
 import subprocess
 
-def process_mailbox(M, command):
-    """
-    Do something with emails messages in the folder.
-    For the sake of this example, print some headers.
-    """
+def process_mailbox(imap_ressource, command, delete="false", mar="false"):
 
-    rv, data = M.search(None, "ALL")
-    if rv != 'OK':
+    if mar == "true" :
+        # If MarkAsRead is setted, we will manage only the unread messages
+        result, data = imap_ressource.search(None, "ALL", "(UNSEEN)")
+    else :
+        result, data = imap_ressource.search(None, "ALL")
+
+    if result != 'OK':
         print("No messages found!")
         return
 
     for num in data[0].split():
-        rv, data = M.fetch(num, '(RFC822)')
-        if rv != 'OK':
+        result, data = imap_ressource.fetch(num, '(RFC822)')
+        if result != 'OK':
             print("ERROR getting message", num)
             return
 
-        print(data[0][1].decode("utf-8"))
-        """msg = email.message_from_bytes(data[0][1])"""
+        # Launching subprocess
+        
         proc = subprocess.Popen(command.split(' '), stdin=subprocess.PIPE)
         proc.stdin.write(data[0][1])
+        proc.communicate()
+
+        if proc.returncode == 0:
+            if mar == "true" :
+                imap_ressource.store(num, '+FLAGS', '\Seen')
+            if delete == "true" :
+                imap_ressource.store(num, '+FLAGS', '\Deleted')
+
+    imap_ressource.expunge()
 
 
 
@@ -68,6 +78,14 @@ parser.add_argument('-e', '--exec',
     action="store", dest="execute",
 help="Command to execute" )
 
+parser.add_argument('-d', '--delete',
+    action="store", dest="delete",
+help="delete email after processing", default="false", choices=['false', 'true'])
+
+parser.add_argument('-r', '--markasread',
+    action="store", dest="mar",
+help="mark email as readen after processing", default="true", choices=['false', 'true'])
+
 
 options = parser.parse_args()
 
@@ -92,7 +110,7 @@ if result == 'OK':
 result, data = imap_ressource.select(options.folder)
 if result == 'OK':
     print("Processing mailbox...\n")
-    process_mailbox(imap_ressource,options.execute)
+    process_mailbox(imap_ressource, options.execute, mar = options.mar, delete=options.delete)
     imap_ressource.close()
 else:
     print("ERROR: Unable to open mailbox ", rv)
