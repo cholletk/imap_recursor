@@ -3,7 +3,6 @@
 # Very basic example of using Python and IMAP to iterate over emails in a
 # gmail folder/label.  This code is released into the public domain.
 #
-# RKI July 2013
 # http://www.voidynullness.net/blog/2013/07/25/gmail-email-with-python-via-imap/
 #
 import sys
@@ -19,7 +18,7 @@ EMAIL_FOLDER = "Top Secret/PRISM Documents"
 
 def process_mailbox(M):
     """
-    Do something with emails messages in the folder.  
+    Do something with emails messages in the folder.
     For the sake of this example, print some headers.
     """
 
